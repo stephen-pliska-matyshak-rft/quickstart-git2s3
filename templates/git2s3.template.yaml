@@ -11,6 +11,7 @@ Metadata:
         Parameters:
           - OutputBucketName
           - CustomDomainName
+          - AccountPrefix
       - Label:
           default: Git pull settings
         Parameters:
@@ -31,6 +32,8 @@ Metadata:
           - SubnetIds
           - ScmHostnameOverride
     ParameterLabels:
+      AccountPrefix:
+        default: Account prefix for objects
       AllowedIps:
         default: Allowed IP addresses
       ApiSecret:
@@ -56,10 +59,14 @@ Metadata:
       ExcludeGit:
         default: Exclude .git directory
 Parameters:
+  AccountPrefix:
+    Description: A prefix for all objects created based on asset id.
+    Type: String
+    Default: 'a204309-cicd-'
   AllowedIps:
     Description: Comma-separated list of allowed IP CIDR blocks. The default addresses listed are BitBucket Cloud IP ranges.
     Type: String
-    Default: 18.205.93.0/25,18.234.32.128/25,13.52.5.0/25
+    Default: 34.198.203.127/32,34.198.178.64/32,34.198.32.85/32,104.192.136.0/21,10.52.131.182/32
   ApiSecret:
     Description: API secret used to authenticate access to webhooks in GitHub Enterprise, GitLab, and other Git services. If a webhook payload header contains a matching secret, IP address authentication is bypassed. API secrets cannot contain commas (,), backward slashes (\), or quotes (").
     Type: String
