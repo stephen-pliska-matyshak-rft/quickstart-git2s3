@@ -62,7 +62,7 @@ Parameters:
   AccountPrefix:
     Description: A prefix for all objects created based on asset id.
     Type: String
-    Default: 'a204309-cicd-'
+    Default: ''
   AllowedIps:
     Description: Comma-separated list of allowed IP CIDR blocks. The default addresses listed are BitBucket Cloud IP ranges.
     Type: String
@@ -120,6 +120,10 @@ Parameters:
     AllowedValues: ['True', 'False']
 
 Conditions:
+  UseAccoutPrefix: !Not
+    - !Equals
+      - !Ref 'AccountPrefix'
+      - ''
   UseAllowedIps: !Not
     - !Equals
       - !Ref 'AllowedIps'
@@ -146,6 +150,16 @@ Resources:
   LambdaZipsBucket:
     Type: AWS::S3::Bucket
     Properties:
+      BucketName: !If
+        - UseAccountPrefix
+        - !Sub '${AccountPrefix}-lambda-zips-bucket'
+        - !Ref 'AWS:NoValue'
+      BucketEncryption: 'SSE-S3'
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: True
+        BlockPublicPolicy: True
+        IgnorePublicAcls: True
+        RestrictPublicBuckets: True
       Tags: []
 
   CopyZips:
@@ -163,6 +177,10 @@ Resources:
   CopyZipsRole:
     Type: AWS::IAM::Role
     Properties:
+      RoleName: !If
+        - UseAccountPrefix
+        - !Sub '${AccountPrefix}-copy-zips-role'
+        - !Ref 'AWS:NoValue'
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -199,6 +217,10 @@ Resources:
   CopyZipsFunction:
     Type: AWS::Lambda::Function
     Properties:
+      FunctionName: !If
+        - UseAccountPrefix
+        - !Sub '${AccountPrefix}-copy-zips-lambda'
+        - !Ref 'AWS:NoValue'
       Description: Copies objects from a source S3 bucket to a destination.
       Handler: index.handler
       Runtime: python3.7
@@ -267,6 +289,16 @@ Resources:
   KeyBucket:
     Type: AWS::S3::Bucket
     Properties:
+      BucketName: !If
+        - UseAccoutPrefix
+        - !Sub '${AccountPrefix}-sshkey-bucket'
+        - !Ref 'AWS:NoValue'
+      BucketEncryption: 'SSE-S3'
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: True
+        BlockPublicPolicy: True
+        IgnorePublicAcls: True
+        RestrictPublicBuckets: True
       Tags: []
 
   OutputBucket:
@@ -274,16 +306,26 @@ Resources:
     Properties:
       BucketName: !If
         - AutoGenOutputBucketName
-        - !Ref 'OutputBucketName'
+        - !If
+          - UseAccountPrefix
+          - !Sub '${AccountPrefix}-${OutputBucketName}'
+          - !Ref 'OutputBucketName'
         - !Ref 'AWS::NoValue'
       VersioningConfiguration:
         Status: Enabled
+      BucketEncryption: 'SSE-S3'
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: True
+        BlockPublicPolicy: True
+        IgnorePublicAcls: True
+        RestrictPublicBuckets: True
       Tags: []
 
   KMSKey:
     Type: AWS::KMS::Key
     Properties:
       Description: AWS KWS key to encrypt and decrypt SSH keys stored in S3. 
+      EnableKeyRotation: True
       KeyPolicy:
         Version: '2012-10-17'
         Statement:
@@ -347,6 +389,10 @@ Resources:
   CreateSSHKeyRole:
     Type: AWS::IAM::Role
     Properties:
+      RoleName: !If
+        - UseAccountPrefix
+        - !Sub '${AccountPrefix}-create-sshkey-role'
+        - !Ref 'AWS:NoValue'
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -356,7 +402,10 @@ Resources:
             Action: sts:AssumeRole
       Path: /
       Policies:
-        - PolicyName: git2cp-sshkeygen
+        - PolicyName: !If
+          - UseAccountPrefix
+          - !Sub '${AccountPrefix}-git2cp-sshkeygen'
+          - 'git2cp-sshkeygen'
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
@@ -395,6 +444,10 @@ Resources:
     DependsOn: CopyZips
     Type: AWS::Lambda::Function
     Properties:
+      FunctionName: !If
+        - UseAccountPrefix
+        - !Sub '${AccountPrefix}-create-sshkey-lambda'
+        - !Ref 'AWS:NoValue'
       Handler: lambda_function.lambda_handler
       MemorySize: 128
       Role: !GetAtt 'CreateSSHKeyRole.Arn'
@@ -416,6 +469,10 @@ Resources:
   DeleteBucketContentsRole:
     Type: AWS::IAM::Role
     Properties:
+      RoleName: !If
+        - UseAccountPrefix
+        - !Sub '${AccountPrefix}-delete-bucket-contents-role'
+        - !Ref 'AWS:NoValue'
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -425,7 +482,10 @@ Resources:
             Action: sts:AssumeRole
       Path: /
       Policies:
-        - PolicyName: git2cp-deletebucketcontents
+        - PolicyName: !If
+          - UseAccountPrefix
+          - !Sub '${AccountPrefix}-git2cp-deletebucketcontents'
+          - 'git2cp-deletebucketcontents'
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
@@ -463,6 +523,10 @@ Resources:
     DependsOn: CopyZips
     Type: AWS::Lambda::Function
     Properties:
+      FunctionName: !If
+        - UseAccountPrefix
+        - !Sub '${AccountPrefix]-delete-bucket-contents-lambda'
+        - !Ref 'AWS:NoValue'
       Handler: lambda_function.lambda_handler
       MemorySize: 128
       Role: !GetAtt 'DeleteBucketContentsRole.Arn'
@@ -486,67 +550,79 @@ Resources:
   CodeBuildServiceRole:
     Type: "AWS::IAM::Role"
     Properties:
-        AssumeRolePolicyDocument:
-          Version: "2012-10-17"
-          Statement:
-          - Effect: "Allow"
-            Principal:
-                Service: "codebuild.amazonaws.com" 
-            Action: 
-                - "sts:AssumeRole"
-        Path: "/"
-        ManagedPolicyArns:
-          - !Ref CodeBuildEndpointPolicy
-        Tags: 
-          -
-              Key: 'tagging-policy'
-              Value: !Join ['-', ["test", "ok"]]
+      RoleName: !If
+        - UseAccountPrefix
+        - !Sub '${AccountPrefix}-codebuild-role'
+        - !Ref 'AWS:NoValue'
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+        - Effect: "Allow"
+          Principal:
+            Service: "codebuild.amazonaws.com" 
+          Action: 
+            - "sts:AssumeRole"
+      Path: "/"
+      ManagedPolicyArns:
+        - !Ref CodeBuildEndpointPolicy
+      Tags: 
+        -
+          Key: 'tagging-policy'
+          Value: !Join ['-', ["test", "ok"]]
 
   CodeBuildBasePolicy:
     Type: 'AWS::IAM::ManagedPolicy'
     Properties:
-        Description: Policy with base permissions for CodeBuild.
-        Path: /
-        Roles: 
-          - !Ref CodeBuildServiceRole
-        PolicyDocument:
-          Version: 2012-10-17
-          Statement:
-          - Effect: "Allow"
-            Action: 
-                - "logs:CreateLogGroup"
-                - "logs:PutLogEvents"
-                - "logs:CreateLogStream"
-            Resource:
-                - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/*"
-          - Effect: "Allow"
-            Action:
-                - "s3:GetObject"
-                - "s3:GetObjectVersion"
-                - "s3:GetBucketAcl"
-                - "s3:GetBucketLocation"
-            Resource:
-                - !GetAtt KeyBucket.Arn
-                - !Sub "${KeyBucket.Arn}/*"
-          - Effect: "Allow"
-            Action:
-                - "s3:PutObject"
-            Resource:
-                - !GetAtt OutputBucket.Arn
-                - !Sub "${OutputBucket.Arn}/*"
-          - Effect: "Allow"
-            Action:
-                - 'kms:Encrypt'
-                - 'kms:Decrypt'
-                - 'kms:ReEncrypt*'
-                - 'kms:GenerateDataKey*'
-                - 'kms:DescribeKey'
-            Resource:
-                - !GetAtt KMSKey.Arn
+      ManagedPolicyName: !If
+        - UseAccountPrefix
+        - !Sub '${AccountPrefix}-codebuild-base-policy'
+        - !Ref 'AWS:NoValue'
+      Description: Policy with base permissions for CodeBuild.
+      Path: /
+      Roles: 
+        - !Ref CodeBuildServiceRole
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+        - Effect: "Allow"
+          Action: 
+            - "logs:CreateLogGroup"
+            - "logs:PutLogEvents"
+            - "logs:CreateLogStream"
+          Resource:
+            - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/*"
+        - Effect: "Allow"
+          Action:
+            - "s3:GetObject"
+            - "s3:GetObjectVersion"
+            - "s3:GetBucketAcl"
+            - "s3:GetBucketLocation"
+          Resource:
+            - !GetAtt KeyBucket.Arn
+            - !Sub "${KeyBucket.Arn}/*"
+        - Effect: "Allow"
+          Action:
+            - "s3:PutObject"
+          Resource:
+            - !GetAtt OutputBucket.Arn
+            - !Sub "${OutputBucket.Arn}/*"
+        - Effect: "Allow"
+          Action:
+            - 'kms:Encrypt'
+            - 'kms:Decrypt'
+            - 'kms:ReEncrypt*'
+            - 'kms:GenerateDataKey*'
+            - 'kms:DescribeKey'
+          Resource:
+            - !GetAtt KMSKey.Arn
 
   CodeBuildEndpointPolicy:
     Type: 'AWS::IAM::ManagedPolicy'
     Properties:
+        ManagedPolicyName: !If
+          - UseAccountPrefix
+          - !Sub '${AccountPrefix}-codebuild-endpoint-policy'
+          - !Ref 'AWS:NoValue'
         Description: Policy with permissions enabling CodeBuild to work with endpoints.
         Path: /
         PolicyDocument:
@@ -570,6 +646,10 @@ Resources:
   GitPullRole:
     Type: AWS::IAM::Role
     Properties:
+      RoleName: !If
+        - UseAccountPrefix
+        - !Sub '${AccountPrefix}-git-pull-role'
+        - !Ref 'AWS:NoValue'
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -579,7 +659,10 @@ Resources:
             Action: sts:AssumeRole
       Path: /
       Policies:
-        - PolicyName: git2cp-gitpull
+        - PolicyName: !If
+          - UseAccountPrefix
+          - !Sub '${AccountPrefix}-git2cp-gitpull'
+          - 'git2cp-gitpull'
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
@@ -638,9 +721,14 @@ Resources:
                 Action:
                   - 'ec2:CreateNetworkInterfacePermission'
                 Resource: !Sub 'arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:network-interface/*'
+
   GitPullCodeBuild:
       Type: AWS::CodeBuild::Project
       Properties:
+        Name: !If
+          - UseAccountPrefix
+          - !Sub '${AccountPrefix}-codebuild-project'
+          - !Ref 'AWS:NoValue'
         VpcConfig: !If
           - ShouldRunInVPC
           - SecurityGroupIds:
@@ -651,7 +739,7 @@ Resources:
         Artifacts:
           Type: NO_ARTIFACTS
         Environment:
-          Image: aws/codebuild/standard:2.0
+          Image: aws/codebuild/standard:4.0
           Type: LINUX_CONTAINER
           ComputeType: BUILD_GENERAL1_SMALL
         QueuedTimeoutInMinutes: 60
@@ -666,9 +754,7 @@ Resources:
               phases:
                 install:
                     runtime-versions:
-                        python: 3.7
-                    # commands:
-                    # - pip3 install boto3
+                        python: 3.8
                 build:
                     commands:
                     - echo "=======================Start-Deployment============================="
@@ -720,6 +806,10 @@ Resources:
     DependsOn: CopyZips
     Type: AWS::Lambda::Function
     Properties:
+      FunctionName: !If
+        - UseAccountPrefix
+        - !Sub '${AccountPrefix}-git-pull-lambda'
+        - !Ref 'AWS:NoValue'
       Handler: lambda_function.lambda_handler
       MemorySize: 128
       Role: !GetAtt 'GitPullRole.Arn'
@@ -743,6 +833,10 @@ Resources:
     Condition: ShouldRunInVPC
     Type: AWS::EC2::SecurityGroup
     Properties:
+      GroupName: !If
+        - UseAccountPrefix
+        - !Sub '${AccountPrefix}-gitpull-sg'
+        - !Ref 'AWS:NoValue'
       GroupDescription: Security Group to allow the Lambda function to access the Git service.
       SecurityGroupEgress:
         - CidrIp: 0.0.0.0/0
@@ -759,6 +853,10 @@ Resources:
   WebHookRole:
     Type: AWS::IAM::Role
     Properties:
+      RoleName: !If
+        - UseAccountPrefix
+        - !Sub '${AccountPrefix}-webhook-role'
+        - !Ref 'AWS:NoValue'
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -770,7 +868,10 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs
       Policies:
-        - PolicyName: git2cp-webhook
+        - PolicyName: !If
+          - UseAccountPrefix
+          - !Sub '${AccountPrefix}-git2cp-webhook'
+          - 'git2cp-webhook'
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
@@ -783,6 +884,10 @@ Resources:
   WebHookApi:
     Type: AWS::ApiGateway::RestApi
     Properties:
+      Name: !If
+        - UseAccountPrefix
+        - !Sub '${AccountPrefix}-rest-api'
+        - !Ref 'AWS:NoValue'
       Body:
         swagger: '2.0'
         info:
@@ -967,4 +1072,7 @@ Outputs:
         - /gitpull
 
   OutputBucketName:
-    Value: !Ref 'OutputBucket'
+    Value: !If
+      - UseAccountPrefix
+      - !Sub '${AccountPrefix}-${OutputBucket}'
+      - !Ref 'OutputBucket'
