@@ -60,7 +60,7 @@ Metadata:
         default: Exclude .git directory
 Parameters:
   AccountPrefix:
-    Description: A prefix for all objects created based on asset id.
+    Description: (Optional) A prefix for all objects created based on organizational requirements.
     Type: String
     Default: ''
   AllowedIps:
@@ -77,7 +77,7 @@ Parameters:
     Type: String
     Default: ''
   OutputBucketName:
-    Description: (Optional) Name for the S3 bucket where the Git repository .zip file is stored. If left blank, the Quick Start creates one for you.
+    Description: (Optional) Name for the S3 bucket where the Git repository .zip file is stored. If left blank, the Quick Start creates one for you. If AccountPrefix is specified, this is required.
     Type: String
     Default: ''
   QSS3BucketName:
@@ -156,10 +156,10 @@ Resources:
         - !Ref 'AWS:NoValue'
       BucketEncryption: 'SSE-S3'
       PublicAccessBlockConfiguration:
-        BlockPublicAcls: True
-        BlockPublicPolicy: True
-        IgnorePublicAcls: True
-        RestrictPublicBuckets: True
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
       Tags: []
 
   CopyZips:
@@ -298,10 +298,10 @@ Resources:
         - !Ref 'AWS:NoValue'
       BucketEncryption: 'SSE-S3'
       PublicAccessBlockConfiguration:
-        BlockPublicAcls: True
-        BlockPublicPolicy: True
-        IgnorePublicAcls: True
-        RestrictPublicBuckets: True
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
       Tags: []
 
   OutputBucket:
@@ -318,17 +318,17 @@ Resources:
         Status: Enabled
       BucketEncryption: 'SSE-S3'
       PublicAccessBlockConfiguration:
-        BlockPublicAcls: True
-        BlockPublicPolicy: True
-        IgnorePublicAcls: True
-        RestrictPublicBuckets: True
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
       Tags: []
 
   KMSKey:
     Type: AWS::KMS::Key
     Properties:
       Description: AWS KWS key to encrypt and decrypt SSH keys stored in S3. 
-      EnableKeyRotation: True
+      EnableKeyRotation: true
       KeyPolicy:
         Version: '2012-10-17'
         Statement:
