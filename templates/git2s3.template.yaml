@@ -192,7 +192,10 @@ Resources:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
       Path: /
       Policies:
-        - PolicyName: lambda-copier
+        - PolicyName: !If
+            - UseAccountPrefix
+            - !Sub '${AccountPrefix}-lambda-copier'
+            - !Ref 'AWS:NoValue'
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
@@ -403,9 +406,9 @@ Resources:
       Path: /
       Policies:
         - PolicyName: !If
-          - UseAccountPrefix
-          - !Sub '${AccountPrefix}-git2cp-sshkeygen'
-          - 'git2cp-sshkeygen'
+            - UseAccountPrefix
+            - !Sub '${AccountPrefix}-git2cp-sshkeygen'
+            - 'git2cp-sshkeygen'
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
@@ -483,9 +486,9 @@ Resources:
       Path: /
       Policies:
         - PolicyName: !If
-          - UseAccountPrefix
-          - !Sub '${AccountPrefix}-git2cp-deletebucketcontents'
-          - 'git2cp-deletebucketcontents'
+            - UseAccountPrefix
+            - !Sub '${AccountPrefix}-git2cp-deletebucketcontents'
+            - 'git2cp-deletebucketcontents'
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
@@ -660,9 +663,9 @@ Resources:
       Path: /
       Policies:
         - PolicyName: !If
-          - UseAccountPrefix
-          - !Sub '${AccountPrefix}-git2cp-gitpull'
-          - 'git2cp-gitpull'
+            - UseAccountPrefix
+            - !Sub '${AccountPrefix}-git2cp-gitpull'
+            - 'git2cp-gitpull'
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
@@ -869,9 +872,9 @@ Resources:
         - arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs
       Policies:
         - PolicyName: !If
-          - UseAccountPrefix
-          - !Sub '${AccountPrefix}-git2cp-webhook'
-          - 'git2cp-webhook'
+            - UseAccountPrefix
+            - !Sub '${AccountPrefix}-git2cp-webhook'
+            - 'git2cp-webhook'
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
@@ -881,6 +884,7 @@ Resources:
                   - lambda:InvokeFunction
                 Resource:
                   - !GetAtt 'GitPullLambda.Arn'
+
   WebHookApi:
     Type: AWS::ApiGateway::RestApi
     Properties:
