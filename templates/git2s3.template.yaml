@@ -120,7 +120,7 @@ Parameters:
     AllowedValues: ['True', 'False']
 
 Conditions:
-  UseAccoutPrefix: !Not
+  UseAccountPrefix: !Not
     - !Equals
       - !Ref 'AccountPrefix'
       - ''
@@ -293,7 +293,7 @@ Resources:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: !If
-        - UseAccoutPrefix
+        - UseAccountPrefix
         - !Sub '${AccountPrefix}-sshkey-bucket'
         - !Ref 'AWS::NoValue'
       BucketEncryption: 'SSE-S3'
