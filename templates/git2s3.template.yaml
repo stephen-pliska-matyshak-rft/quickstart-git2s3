@@ -153,7 +153,7 @@ Resources:
       BucketName: !If
         - UseAccountPrefix
         - !Sub '${AccountPrefix}-lambda-zips-bucket'
-        - !Ref 'AWS:NoValue'
+        - !Ref 'AWS::NoValue'
       BucketEncryption: 'SSE-S3'
       PublicAccessBlockConfiguration:
         BlockPublicAcls: true
@@ -180,7 +180,7 @@ Resources:
       RoleName: !If
         - UseAccountPrefix
         - !Sub '${AccountPrefix}-copy-zips-role'
-        - !Ref 'AWS:NoValue'
+        - !Ref 'AWS::NoValue'
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -195,7 +195,7 @@ Resources:
         - PolicyName: !If
             - UseAccountPrefix
             - !Sub '${AccountPrefix}-lambda-copier'
-            - !Ref 'AWS:NoValue'
+            - !Ref 'AWS::NoValue'
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
@@ -223,7 +223,7 @@ Resources:
       FunctionName: !If
         - UseAccountPrefix
         - !Sub '${AccountPrefix}-copy-zips-lambda'
-        - !Ref 'AWS:NoValue'
+        - !Ref 'AWS::NoValue'
       Description: Copies objects from a source S3 bucket to a destination.
       Handler: index.handler
       Runtime: python3.7
@@ -295,7 +295,7 @@ Resources:
       BucketName: !If
         - UseAccoutPrefix
         - !Sub '${AccountPrefix}-sshkey-bucket'
-        - !Ref 'AWS:NoValue'
+        - !Ref 'AWS::NoValue'
       BucketEncryption: 'SSE-S3'
       PublicAccessBlockConfiguration:
         BlockPublicAcls: true
@@ -395,7 +395,7 @@ Resources:
       RoleName: !If
         - UseAccountPrefix
         - !Sub '${AccountPrefix}-create-sshkey-role'
-        - !Ref 'AWS:NoValue'
+        - !Ref 'AWS::NoValue'
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -450,7 +450,7 @@ Resources:
       FunctionName: !If
         - UseAccountPrefix
         - !Sub '${AccountPrefix}-create-sshkey-lambda'
-        - !Ref 'AWS:NoValue'
+        - !Ref 'AWS::NoValue'
       Handler: lambda_function.lambda_handler
       MemorySize: 128
       Role: !GetAtt 'CreateSSHKeyRole.Arn'
@@ -475,7 +475,7 @@ Resources:
       RoleName: !If
         - UseAccountPrefix
         - !Sub '${AccountPrefix}-delete-bucket-contents-role'
-        - !Ref 'AWS:NoValue'
+        - !Ref 'AWS::NoValue'
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -529,7 +529,7 @@ Resources:
       FunctionName: !If
         - UseAccountPrefix
         - !Sub '${AccountPrefix]-delete-bucket-contents-lambda'
-        - !Ref 'AWS:NoValue'
+        - !Ref 'AWS::NoValue'
       Handler: lambda_function.lambda_handler
       MemorySize: 128
       Role: !GetAtt 'DeleteBucketContentsRole.Arn'
@@ -556,7 +556,7 @@ Resources:
       RoleName: !If
         - UseAccountPrefix
         - !Sub '${AccountPrefix}-codebuild-role'
-        - !Ref 'AWS:NoValue'
+        - !Ref 'AWS::NoValue'
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -579,7 +579,7 @@ Resources:
       ManagedPolicyName: !If
         - UseAccountPrefix
         - !Sub '${AccountPrefix}-codebuild-base-policy'
-        - !Ref 'AWS:NoValue'
+        - !Ref 'AWS::NoValue'
       Description: Policy with base permissions for CodeBuild.
       Path: /
       Roles: 
@@ -625,7 +625,7 @@ Resources:
         ManagedPolicyName: !If
           - UseAccountPrefix
           - !Sub '${AccountPrefix}-codebuild-endpoint-policy'
-          - !Ref 'AWS:NoValue'
+          - !Ref 'AWS::NoValue'
         Description: Policy with permissions enabling CodeBuild to work with endpoints.
         Path: /
         PolicyDocument:
@@ -652,7 +652,7 @@ Resources:
       RoleName: !If
         - UseAccountPrefix
         - !Sub '${AccountPrefix}-git-pull-role'
-        - !Ref 'AWS:NoValue'
+        - !Ref 'AWS::NoValue'
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -731,7 +731,7 @@ Resources:
         Name: !If
           - UseAccountPrefix
           - !Sub '${AccountPrefix}-codebuild-project'
-          - !Ref 'AWS:NoValue'
+          - !Ref 'AWS::NoValue'
         VpcConfig: !If
           - ShouldRunInVPC
           - SecurityGroupIds:
@@ -812,7 +812,7 @@ Resources:
       FunctionName: !If
         - UseAccountPrefix
         - !Sub '${AccountPrefix}-git-pull-lambda'
-        - !Ref 'AWS:NoValue'
+        - !Ref 'AWS::NoValue'
       Handler: lambda_function.lambda_handler
       MemorySize: 128
       Role: !GetAtt 'GitPullRole.Arn'
@@ -839,7 +839,7 @@ Resources:
       GroupName: !If
         - UseAccountPrefix
         - !Sub '${AccountPrefix}-gitpull-sg'
-        - !Ref 'AWS:NoValue'
+        - !Ref 'AWS::NoValue'
       GroupDescription: Security Group to allow the Lambda function to access the Git service.
       SecurityGroupEgress:
         - CidrIp: 0.0.0.0/0
@@ -859,7 +859,7 @@ Resources:
       RoleName: !If
         - UseAccountPrefix
         - !Sub '${AccountPrefix}-webhook-role'
-        - !Ref 'AWS:NoValue'
+        - !Ref 'AWS::NoValue'
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -891,7 +891,7 @@ Resources:
       Name: !If
         - UseAccountPrefix
         - !Sub '${AccountPrefix}-rest-api'
-        - !Ref 'AWS:NoValue'
+        - !Ref 'AWS::NoValue'
       Body:
         swagger: '2.0'
         info:
