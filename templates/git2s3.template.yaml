@@ -154,7 +154,6 @@ Resources:
         - UseAccountPrefix
         - !Sub '${AccountPrefix}-lambda-zips-bucket'
         - !Ref 'AWS::NoValue'
-      BucketEncryption: 'SSE-S3'
       PublicAccessBlockConfiguration:
         BlockPublicAcls: true
         BlockPublicPolicy: true
@@ -296,7 +295,6 @@ Resources:
         - UseAccountPrefix
         - !Sub '${AccountPrefix}-sshkey-bucket'
         - !Ref 'AWS::NoValue'
-      BucketEncryption: 'SSE-S3'
       PublicAccessBlockConfiguration:
         BlockPublicAcls: true
         BlockPublicPolicy: true
@@ -316,7 +314,6 @@ Resources:
         - !Ref 'AWS::NoValue'
       VersioningConfiguration:
         Status: Enabled
-      BucketEncryption: 'SSE-S3'
       PublicAccessBlockConfiguration:
         BlockPublicAcls: true
         BlockPublicPolicy: true
@@ -528,7 +525,7 @@ Resources:
     Properties:
       FunctionName: !If
         - UseAccountPrefix
-        - !Sub '${AccountPrefix]-delete-bucket-contents-lambda'
+        - !Sub '${AccountPrefix}-delete-bucket-contents-lambda'
         - !Ref 'AWS::NoValue'
       Handler: lambda_function.lambda_handler
       MemorySize: 128
@@ -1076,7 +1073,4 @@ Outputs:
         - /gitpull
 
   OutputBucketName:
-    Value: !If
-      - UseAccountPrefix
-      - !Sub '${AccountPrefix}-${OutputBucket}'
-      - !Ref 'OutputBucket'
+    Value: !Ref 'OutputBucket'
