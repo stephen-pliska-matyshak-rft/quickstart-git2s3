@@ -6,6 +6,7 @@
 #  See the License for the specific language governing permissions and limitations under the License.
 
 from boto3 import client
+import sys
 import os
 import time
 import stat
@@ -37,6 +38,9 @@ kms = client('kms')
 
 def lambda_handler(event, context):
     print(event)
+    if event['body-json']['user_name'] == 's.tr.wm_bot':
+        print('The bot account did the merge...exiting.')
+        sys.exit(0)
     keybucket = event['context']['key-bucket']
     outputbucket = event['context']['output-bucket']
     pubkey = event['context']['public-key']
